@@ -60,7 +60,7 @@ class Artist(db.Model):
     facebook_link = db.Column(db.String(120))
     seeking_description = db.Column(db.String(120))
     seeking_venue = db.Column(db.Boolean, default=False)
-    shows = db.relationship('Show', backref='venue', lazy=True)
+    shows = db.relationship('Show', backref='artist', lazy=True)
 
     def __repr__(self):
         return f'<Artist {self.id} {self.name}>'
