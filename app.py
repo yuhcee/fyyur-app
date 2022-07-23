@@ -219,7 +219,7 @@ def search_artists():
 
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
-    
+
     artist = Artist.query.filter(Artist.id == artist_id).first()
 
     past = db.session.query(Show).filter(Show.artist_id == artist_id).filter(
@@ -279,7 +279,19 @@ def show_artist(artist_id):
 def edit_artist(artist_id):
     form = ArtistForm()
 
-    # TODO: populate form with fields from artist with ID <artist_id>
+    artist = Artist.query.filter(Artist.id == artist_id).first()
+
+    form.city.data = artist.city
+    form.name.data = artist.name
+    form.phone.data = artist.phone
+    form.state.data = artist.state
+    form.genres.data = artist.genres
+    form.website_link.data = artist.website
+    form.image_link.data = artist.image_link
+    form.facebook_link.data = artist.facebook_link
+    form.seeking_venue.data = artist.seeking_venue
+    form.seeking_description.data = artist.seeking_description
+    
     return render_template('forms/edit_artist.html', form=form, artist=artist)
 
 
