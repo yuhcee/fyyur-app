@@ -74,6 +74,9 @@ def show_venue(venue_id):
 
     venue = Venue.query.filter(Venue.id == venue_id).first()
 
+    if venue is None:
+        abort(404)
+
     past = Show.query.filter(Show.venue_id == venue_id).filter(
         Show.start_time < datetime.now()).join(Artist, Show.artist_id == Artist.id).add_columns(Artist.id, Artist.name, Artist.image_link, Show.start_time).all()
 
@@ -99,9 +102,6 @@ def show_venue(venue_id):
             'artist_image_link': show[3],
             'start_time': str(show[4])
         })
-
-    if venue is None:
-        abort(404)
 
     data = {
         "id": venue.id,
@@ -203,17 +203,26 @@ def artists():
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
-    # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
-    # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
-    # search for "band" should return "The Wild Sax Band".
+
+    search_term = request.form.get('search_term', '')
+    artists = db.session.query(Artist).filter(
+        Artist.name.ilike(f'%{search_term}%')).all()
+    count = len(artists)
+    data = []
+
+    for artist in artists:
+        data.append({
+            "id": artist.id,
+            "name": artist.name,
+            "num_upcoming_shows": len(db.session.query(Show.artist_id == artist.id).filter(
+                Show.start_time > datetime.now()).all())
+        })
+
     response = {
-        "count": 1,
-        "data": [{
-            "id": 4,
-            "name": "Guns N Petals",
-            "num_upcoming_shows": 0,
-        }]
+        "count": count,
+        "data": data
     }
+
     return render_template('pages/search_artists.html', results=response, search_term=request.form.get('search_term', ''))
 
 
@@ -221,6 +230,9 @@ def search_artists():
 def show_artist(artist_id):
 
     artist = Artist.query.filter(Artist.id == artist_id).first()
+
+    if artist is None:
+        abort(404)
 
     past = db.session.query(Show).filter(Show.artist_id == artist_id).filter(
         Show.start_time < datetime.now()).join(Venue, Show.venue_id == Venue.id).add_columns(Venue.id, Venue.name, Venue.image_link, Show.start_time).all()
@@ -247,9 +259,6 @@ def show_artist(artist_id):
             'venue_image_link': show[3],
             'start_time': str(show[4])
         })
-
-    if artist is None:
-        abort(404)
 
     data = {
         "id": artist.id,
