@@ -71,8 +71,56 @@ def search_venues():
 
 @ app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
-    # shows the venue page with the given venue_id
-    # TODO: replace with real venue data from the venues table, using venue_id
+    
+    venue = Venue.query.filter(Venue.id == venue_id).first()
+
+    past = Show.query.filter(Show.venue_id == venue_id).filter(
+        Show.start_time < datetime.now()).join(Artist, Show.artist_id == Artist.id).add_columns(Artist.id, Artist.name, Artist.image_link, Show.start_time).all()
+
+    upcoming = db.session.query(Show).filter(Show.venue_id == venue_id).filter(
+        Show.start_time > datetime.now()).join(Artist, Show.artist_id == Artist.id).add_columns(Artist.id, Artist.name, Artist.image_link, Show.start_time).all()
+
+    upcoming_shows = []
+
+    past_shows = []
+
+    for show in upcoming:
+        upcoming_shows.append({
+            'artist_id': show[1],
+            'artist_name': show[2],
+            'artist_image_link': str(show[3]),
+            'start_time': str(show[4])
+        })
+
+    for show in past:
+        past_shows.append({
+            'artist_id': show[1],
+            'artist_name': show[2],
+            'artist_image_link': show[3],
+            'start_time': str(show[4])
+        })
+
+    if venue is None:
+        abort(404)
+
+    data = {
+        "id": venue.id,
+        "name": venue.name,
+        "genres": [venue.genres],
+        "address": venue.address,
+        "city": venue.city,
+        "state": venue.state,
+        "phone": venue.phone,
+        "website": venue.website,
+        "facebook_link": venue.facebook_link,
+        "seeking_talent": venue.seeking_talent,
+        "seeking_description": venue.seeking_description,
+        "image_link": venue.image_link,
+        "past_shows": past_shows,
+        "upcoming_shows": upcoming_shows,
+        "past_shows_count": len(past),
+        "upcoming_shows_count": len(upcoming),
+    }
 
     return render_template('pages/show_venue.html', venue=data)
 
