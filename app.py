@@ -55,10 +55,15 @@ def venues():
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
-    # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
-    # seach for Hop should return "The Musical Hop".
-    # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
 
+    search_term = request.form.get('search_term', '')
+    search_result = db.session.query(Venue).filter(
+        Venue.name.ilike(f'%{search_term}%')).all()
+    count = len(search_result)
+
+    response = {
+        "count": count,
+        "data": search_result
     }
 
     return render_template('pages/search_venues.html', results=response, search_term=request.form.get('search_term', ''))
@@ -68,7 +73,6 @@ def search_venues():
 def show_venue(venue_id):
     # shows the venue page with the given venue_id
     # TODO: replace with real venue data from the venues table, using venue_id
-
 
     return render_template('pages/show_venue.html', venue=data)
 
@@ -92,17 +96,17 @@ def create_venue_submission():
 
     try:
         venue = Venue(
-            name = request.form['name'],
-            city = request.form['city'],
-            state = request.form['state'],
-            address = request.form['address'],
-            phone = request.form['phone'],
-            genres = request.form.getlist('genres'),
-            image_link = request.form['image_link'],
-            facebook_link = request.form['facebook_link'],
-            website = request.form['website_link'],
-            seeking_talent = seeking_talent,
-            seeking_description = request.form['seeking_description']
+            name=request.form['name'],
+            city=request.form['city'],
+            state=request.form['state'],
+            address=request.form['address'],
+            phone=request.form['phone'],
+            genres=request.form.getlist('genres'),
+            image_link=request.form['image_link'],
+            facebook_link=request.form['facebook_link'],
+            website=request.form['website_link'],
+            seeking_talent=seeking_talent,
+            seeking_description=request.form['seeking_description']
         )
         db.session.add(venue)
         db.session.commit()
@@ -122,19 +126,16 @@ def delete_venue(venue_id):
     # TODO: Complete this endpoint for taking a venue_id, and using
     # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
 
-
     # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
     # clicking that button delete it from the db then redirect the user to the homepage
 
-
-#  Artists
-#  ----------------------------------------------------------------
+    #  Artists
+    #  ----------------------------------------------------------------
 
 
 @app.route('/artists')
 def artists():
     # TODO: replace with real data returned from querying the database
-    
 
     return render_template('pages/artists.html', artists=data)
 
@@ -160,7 +161,6 @@ def show_artist(artist_id):
     # shows the artist page with the given artist_id
     # TODO: replace with real artist data from the artist table, using artist_id
 
-
     return render_template('pages/show_artist.html', artist=data)
 
 #  Update
@@ -171,7 +171,6 @@ def show_artist(artist_id):
 def edit_artist(artist_id):
     form = ArtistForm()
 
-    
     # TODO: populate form with fields from artist with ID <artist_id>
     return render_template('forms/edit_artist.html', form=form, artist=artist)
 
@@ -180,7 +179,6 @@ def edit_artist(artist_id):
 def edit_artist_submission(artist_id):
     # TODO: take values from the form submitted, and update existing
     # artist record with ID <artist_id> using the new attributes
-    
 
     return redirect(url_for('show_artist', artist_id=artist_id))
 
